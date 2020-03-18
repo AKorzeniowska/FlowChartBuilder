@@ -1,0 +1,10 @@
+1 Begin 2
+2 Proc 3
+3 Proc 4
+4 Decis 2 5 tak nie
+5 Proc 6
+6 Decis 3 7 tak nie
+7 Decis 8 9 tak nie
+8 Proc 9
+9 Proc 10
+10 End

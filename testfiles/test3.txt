@@ -1,0 +1,50 @@
+50 Begin 1
+1 Decis 2 3 tak nie
+2 Proc 4
+3 Proc 4
+4 Proc 5
+5 Proc 6
+6 Proc 7
+7 Decis 8 4 tak nie
+8 Decis 25 9 tak nie
+9 Decis 48 10 tak nie
+10 Decis 11 15 tak nie
+11 Decis 22 12 tak nie
+12 Decis 13 14 tak nie
+13 Decis 22 24 tak nie
+14 Decis 24 22 tak nie
+15 Decis 16 19 tak nie
+16 Decis 17 18 tak nie
+17 Decis 22 24 tak nie
+18 Decis 24 22 tak nie
+19 Decis 20 21 tak nie
+20 Decis 22 24 tak nie
+21 Decis 24 22 tak nie
+22 Proc 23
+23 Proc 24
+24 Proc 49
+25 Decis 46 26 tak nie
+26 Proc 27
+27 Decis 30 28 tak nie
+28 Proc 29
+29 Proc 49
+30 Decis 34 31 tak nie
+31 Proc 32
+32 Decis 33 36 tak nie
+33 Proc 40
+34 Decis 39 35 tak nie
+35 Decis 39 36 tak nie
+36 Proc 37
+37 Decis 43 38 tak nie
+38 Proc 49
+39 Proc 40
+40 Proc 41
+41 Proc 42
+42 Decis 44 43 tak nie
+43 Proc 49
+44 Decis 45 29 tak nie
+45 Proc 49
+46 Proc 47
+47 Proc 45
+48 Decis 47 27 tak nie
+49 End
