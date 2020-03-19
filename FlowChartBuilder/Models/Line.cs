@@ -23,6 +23,11 @@ namespace FlowChartBuilder.Models
             Points.Add(new Coordinates(x, y));
         }
 
+        public void AddPointAtStartOfLine(int x, int y)
+        {
+            Points.Insert(0, new Coordinates(x, y));
+        }
+
         public Line(Line line)
         {
             this.Points = new List<Coordinates>();
@@ -38,6 +43,22 @@ namespace FlowChartBuilder.Models
             {
                 Console.WriteLine("(" + point.x + " , " + point.y + ")");
             }
+        }
+
+        public void RemoveMiddlePoints()
+        {
+            var newPoints = new List<Coordinates>();
+            newPoints.Add(this.Points[0]);
+            for (int i = 1; i < this.Points.Count - 1; i++)
+            {
+                var prevPoint = this.Points[i - 1];
+                var point = this.Points[i];
+                var nextPoint = this.Points[i + 1];
+                if (prevPoint.x != nextPoint.x && prevPoint.y != nextPoint.y)
+                    newPoints.Add(point);
+            }
+            newPoints.Add(this.Points[this.Points.Count - 1]);
+            this.Points = newPoints;
         }
     }
 }

@@ -8,6 +8,7 @@ namespace FlowChartBuilder.Models
     {
         private int Id { get; set; }
         private int FollowingNodeId { get; set; }
+        private Coordinates Position { get; set; }
         public StartingNode(int id)
         {
             this.Id = id;
@@ -24,6 +25,16 @@ namespace FlowChartBuilder.Models
         public int GetId()
         {
             return this.Id;
+        }
+
+        public void SetPosition(int x, int y)
+        {
+            this.Position = new Coordinates(x, y);
+        }
+
+        public Coordinates GetPosition()
+        {
+            return this.Position;
         }
     }
 }

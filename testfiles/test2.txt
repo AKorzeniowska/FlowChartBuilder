@@ -2,9 +2,10 @@
 2 Proc 3
 3 Proc 4
 4 Decis 2 5 tak nie
-5 Proc 6
+5 Decis 6 11 tak nie
 6 Decis 3 7 tak nie
 7 Decis 8 9 tak nie
 8 Proc 9
 9 Proc 10
 10 End
+11 Decis 2 1 tak nie

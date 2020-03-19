@@ -11,6 +11,7 @@ namespace FlowChartBuilder.Models
         private string LeftFollowingNodeCondition { get; set; }
         private int RightFollowingNodeId { get; set; }
         private string RightFollowingNodeCondition { get; set; }
+        private Coordinates Position { get; set; }
 
         public DecisionNode(int id)
         {
@@ -40,6 +41,16 @@ namespace FlowChartBuilder.Models
         public int GetRightFollowingNodeId()
         {
             return this.RightFollowingNodeId;
+        }
+
+        public void SetPosition(int x, int y)
+        {
+            this.Position = new Coordinates(x, y);
+        }
+
+        public Coordinates GetPosition()
+        {
+            return this.Position;
         }
     }
 }

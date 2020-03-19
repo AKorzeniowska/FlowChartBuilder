@@ -8,6 +8,7 @@ namespace FlowChartBuilder.Models
     {
         private int Id { get; set; }
         private int FollowingNodeId { get; set; }
+        private Coordinates Position { get; set; }
 
         public ProcessNode(int id)
         {
@@ -27,6 +28,16 @@ namespace FlowChartBuilder.Models
         public int GetFollowingNodeId()
         {
             return this.FollowingNodeId;
+        }
+
+        public void SetPosition(int x, int y)
+        {
+            this.Position = new Coordinates(x, y);
+        }
+
+        public Coordinates GetPosition()
+        {
+            return this.Position;
         }
     }
 }

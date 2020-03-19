@@ -1,4 +1,5 @@
 ﻿using FlowChartBuilder.Models;
+using FlowChartBuilder.Providers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,19 +9,6 @@ namespace FlowChartBuilder.Helpers
 {
     public class LeeAlgorithmInterpreter
     {
-        static int[][] _moves = {
-                new int[] { 1, 0 },
-                new int[] { 0, -1 },
-                new int[] { 0, 1 },
-                new int[] { -1, 0 } };
-
-        static int[][] _reversedMoves = {
-                new int[] { -1, 0 },
-                new int[] { 0, -1 },
-                new int[] { 0, 1 },
-                new int[] { 1, 0 } };
-
-
         static int[][] GetMazeArray(int[,] maze, int mazeHeight, int mazeWidth)
         {
             int[][] convertedMaze = new int[mazeHeight][];
@@ -65,14 +53,16 @@ namespace FlowChartBuilder.Helpers
             int columnIndex,
             int count,
             Line visited,
-              int[][] Moves,
+            int[][] Moves,
+            int maxMoves,
             ref int lowest,
             ref Line optimalVisited)
         {
 
-            if (lowest <= 4) return 1;
+            if (lowest <= 3) return 1;
             if (count > arrayTemp.Length + arrayTemp[0].Length) return 1;
             if (count + 1 > lowest) return 1;
+            if (count + 1 > maxMoves) return 1;
             // Copy map so we can modify it and then abandon it.
             int[][] array = new int[arrayTemp.Length][];
             for (int i = 0; i < arrayTemp.Length; i++)
@@ -105,7 +95,7 @@ namespace FlowChartBuilder.Helpers
                             // Try another move.
                             var visitedDeepCopy = new Line(visited);
                             visitedDeepCopy.AddPointToLine(newRow, newColumn);
-                            Move(array, newRow, newColumn, count + 1, visitedDeepCopy, Moves, ref lowest, ref optimalVisited);
+                            Move(array, newRow, newColumn, count + 1, visitedDeepCopy, Moves, maxMoves, ref lowest, ref optimalVisited);
                         }
                         else if (testValue == -3)
                         {   
@@ -124,7 +114,7 @@ namespace FlowChartBuilder.Helpers
             return -1;
         }
 
-        public static Line DoYourJob(int[,] maze, bool useReversedMoves)
+        public static Line DoYourJob(int[,] maze, int[][] moves, int maxMoves)
         {
             var array = GetMazeArray(maze, maze.GetLength(0), maze.GetLength(1));
             var visited = new Line();
@@ -142,10 +132,11 @@ namespace FlowChartBuilder.Helpers
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
 
-                        if (useReversedMoves)
-                            Move(array, i, x, 0, new Line(), _reversedMoves, ref lowest, ref visited);
-                        else
-                            Move(array, i, x, 0, new Line(), _moves, ref lowest, ref visited);
+                        //if (useReversedMoves)
+                        //    Move(array, i, x, 0, new Line(), MovesProvider._reversedMoves, ref lowest, ref visited);
+                        //else
+                            //Move(array, i, x, 0, new Line(), MovesProvider._moves, ref lowest, ref visited);
+                        Move(array, i, x, 0, new Line(), moves, maxMoves, ref lowest, ref visited);
 
                         sw.Stop();
                         Console.WriteLine("Elapsed={0}", sw.Elapsed);

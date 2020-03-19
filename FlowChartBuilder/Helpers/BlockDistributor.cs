@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FlowChartBuilder.Helpers
 {
-    public class BlockSpawner
+    public class BlockDistributor
     {
         private int[,] Grid { get; set; }
         private List<INode> Nodes { get; set; }
@@ -15,7 +15,7 @@ namespace FlowChartBuilder.Helpers
         private int GridWidth { get; set; }
         private List<int> DecisionNodes { get; set; }
 
-        public BlockSpawner(IEnumerable<INode> nodes)
+        public BlockDistributor(IEnumerable<INode> nodes)
         {
             if (!nodes.OfType<StartingNode>().Any() || nodes.OfType<StartingNode>().Count() > 1)
                 return;
@@ -26,7 +26,7 @@ namespace FlowChartBuilder.Helpers
             var numberOfDecisionNodes = nodes.OfType<DecisionNode>().Count();
             var numberOfProcessNodes = nodes.OfType<ProcessNode>().Count();
 
-            this.GridHeight = 2 *nodes.Count();
+            this.GridHeight = 2 * nodes.Count();
             this.GridWidth = 2 * (numberOfDecisionNodes * 6 + 3);
             this.Grid = new int[GridHeight, GridWidth];
 
@@ -56,7 +56,8 @@ namespace FlowChartBuilder.Helpers
                 return;
             visited.Add(root.GetId());
 
-            if (root.GetType() == typeof(EndingNode)){
+            if (root.GetType() == typeof(EndingNode))
+            {
                 //PrintGrid();
                 return;
             }
@@ -69,7 +70,7 @@ namespace FlowChartBuilder.Helpers
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
                 SetSubtree(yPositioner + 2, xPositioner, nextNode, level);
             }
-            
+
             else if (root.GetType() == typeof(ProcessNode))
             {
                 INode nextNode = Nodes.Find(x => x.GetId() == (root as ProcessNode).GetFollowingNodeId());
@@ -84,8 +85,8 @@ namespace FlowChartBuilder.Helpers
                 INode nextLeftNode = GetNodeById((root as DecisionNode).GetLeftFollowingNodeId());
                 INode nextRightNode = GetNodeById((root as DecisionNode).GetRightFollowingNodeId());
 
-                int xLeftPositioner = xPositioner - (64 / level == 64 ? 32 : 64 / level);
-                int xRightPositioner = xPositioner + (64 / level == 64 ? 32 : 64 / level);
+                int xLeftPositioner = xPositioner - (8 / level);//(64 / level == 64 ? 32 : 16 / level);
+                int xRightPositioner = xPositioner + (8 / level);//(64 / level == 64 ? 32 : 16 / level);
                 while (this.Grid[yPositioner + 2, xLeftPositioner] != 0)
                 {
                     xLeftPositioner += 1;
@@ -156,8 +157,9 @@ namespace FlowChartBuilder.Helpers
                 INode nextLeftNode = GetNodeById((root as DecisionNode).GetLeftFollowingNodeId());
                 INode nextRightNode = GetNodeById((root as DecisionNode).GetRightFollowingNodeId());
 
-                int xLeftPositioner = xPositioner - (32 / depth + 1);
-                int xRightPositioner = xPositioner + (32 / depth + 1);
+                //TODO: ZMIANKA
+                int xLeftPositioner = xPositioner - (4 / depth + 1);
+                int xRightPositioner = xPositioner + (4 / depth + 1);
 
                 if (this.DecisionNodes.Contains(level))
                     depth *= 2;
@@ -255,7 +257,7 @@ namespace FlowChartBuilder.Helpers
                 }
                 counter = 0;
             }
-            return levelsWithDecisionNodes.Select(x => x/=2).ToList();
+            return levelsWithDecisionNodes.Select(x => x /= 2).ToList();
         }
 
         public void RemoveEmptyLines()
@@ -338,5 +340,24 @@ namespace FlowChartBuilder.Helpers
             return result;
         }
 
+        public void SetNodesPositions()
+        {
+            for (int i = 0; i < this.Grid.GetLength(0); i++)
+            {
+                for (int j = 0; j < this.Grid.GetLength(1); j++)
+                {
+                    if (this.Grid[i, j] != 0)
+                    {
+                        GetNodeById(this.Grid[i, j]).SetPosition(i, j);
+                    }
+                }
+            }
+
+        }
+
+        public List<INode> GetNodes()
+        {
+            return this.Nodes;
+        }
     }
 }

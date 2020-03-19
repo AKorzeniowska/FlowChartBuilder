@@ -1,16 +1,28 @@
 ﻿using FlowChartBuilder.Models;
+using FlowChartBuilder.Providers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace FlowChartBuilder.Helpers
 {
-    class GraphMaker
+    public class GraphMaker
     {
         private List<Line> Lines { get; set; }
         private int[,] Grid { get; set; }
         private List<INode> Nodes { get; set; }
         private List<Connection> Connections { get; set; }
+
+        public List<Line> GetLines()
+        {
+            return this.Lines;
+        }
+
+        public List<INode> GetNodes()
+        {
+            return this.Nodes;
+        }
+
 
         public GraphMaker(List<INode> nodes, int[,] grid)
         {
@@ -45,7 +57,7 @@ namespace FlowChartBuilder.Helpers
             foreach (var connection in Connections)
             {
                 var gridCopy = Grid.Clone() as int[,];
-                int x = 0, y = 0;
+                int x1 = 0, x2 = 0, y1 = 0, y2 = 0;
 
                 for (int i = 0; i < gridCopy.GetLength(0); i++)
                 {
@@ -54,12 +66,14 @@ namespace FlowChartBuilder.Helpers
                         if (gridCopy[i, j] == connection.GetFirstNodeId())
                         {
                             gridCopy[i, j] = 1;
-                            x = i;
+                            x1 = i;
+                            y1 = j;
                         }
                         else if (gridCopy[i, j] == connection.GetSecondNodeId())
                         {
                             gridCopy[i, j] = 2;
-                            y = i;
+                            x2 = i;
+                            y2 = j;
                         } 
                         else if (gridCopy[i, j] > 0)
                         {
@@ -69,14 +83,26 @@ namespace FlowChartBuilder.Helpers
                 }
 
                 Line newLine = null;
-                if (x > y)
+                int[][] moves = null;
+                if (x1 > x2 && y1 >= y2)
                 {
-                    newLine = LeeAlgorithmInterpreter.DoYourJob(gridCopy, true);
+                    moves = MovesProvider.UpLeft;
                 }
-                else
+                else if (x1 > x2 && y1 < y2)
                 {
-                    newLine = LeeAlgorithmInterpreter.DoYourJob(gridCopy, false);
+                    moves = MovesProvider.UpRight;
                 }
+                else if (x1 <= x2 && y1 >= y2)
+                {
+                    moves = MovesProvider.DownLeft;
+                }
+                else if (x1 <= x2 && y1 < y2)
+                {
+                    moves = MovesProvider.DownRight;
+                }
+
+                newLine = LeeAlgorithmInterpreter.DoYourJob(gridCopy, moves, (Math.Abs(x1 - x2) + Math.Abs(y1 - y2)) * 2);
+                newLine.AddPointAtStartOfLine(x1, y1);
                 Lines.Add(newLine);
 
                 //gridCopy = Grid.Clone() as int[,];
@@ -88,6 +114,14 @@ namespace FlowChartBuilder.Helpers
                 //    }
                 //}
 
+            }
+        }
+
+        public void RemoveMiddlePointsFromLines()
+        {
+            foreach (var line in this.Lines)
+            {
+                line.RemoveMiddlePoints();
             }
         }
     }
