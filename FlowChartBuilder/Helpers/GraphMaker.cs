@@ -8,12 +8,12 @@ namespace FlowChartBuilder.Helpers
 {
     public class GraphMaker
     {
-        private List<Line> Lines { get; set; }
+        private List<LineModel> Lines { get; set; }
         private int[,] Grid { get; set; }
         private List<INode> Nodes { get; set; }
         private List<Connection> Connections { get; set; }
 
-        public List<Line> GetLines()
+        public List<LineModel> GetLines()
         {
             return this.Lines;
         }
@@ -28,7 +28,7 @@ namespace FlowChartBuilder.Helpers
         {
             this.Nodes = nodes;
             this.Grid = grid;
-            this.Lines = new List<Line>();
+            this.Lines = new List<LineModel>();
             this.Connections = new List<Connection>();
         }
 
@@ -82,7 +82,7 @@ namespace FlowChartBuilder.Helpers
                     }
                 }
 
-                Line newLine = null;
+                LineModel newLine = null;
                 int[][] moves = null;
                 if (x1 > x2 && y1 >= y2)
                 {
@@ -101,7 +101,7 @@ namespace FlowChartBuilder.Helpers
                     moves = MovesProvider.DownRight;
                 }
 
-                newLine = LeeAlgorithmInterpreter.DoYourJob(gridCopy, moves, (Math.Abs(x1 - x2) + Math.Abs(y1 - y2)) * 2);
+                newLine = LeeAlgorithmInterpreter.DoYourJob(gridCopy, moves, (Math.Abs(x1 - x2) + Math.Abs(y1 - y2)) + 4);
                 newLine.AddPointAtStartOfLine(x1, y1);
                 Lines.Add(newLine);
 

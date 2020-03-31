@@ -7,7 +7,7 @@ namespace FlowChartBuilder
     {
         static void Main(string[] args)
         {
-            var path = AppDomain.CurrentDomain.BaseDirectory + @"testfiles\test2.txt";
+            var path = AppDomain.CurrentDomain.BaseDirectory + @"testfiles\test3.txt";
             var list = TextFileParser.ParseText(path.Replace(@"FlowChartBuilder\bin\Debug\netcoreapp3.0\", ""));
             var grid = new BlockDistributor(list);
             grid.PrintGrid();

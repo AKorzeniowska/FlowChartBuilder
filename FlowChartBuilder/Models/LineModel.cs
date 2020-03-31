@@ -4,11 +4,11 @@ using System.Text;
 
 namespace FlowChartBuilder.Models
 {
-    public class Line
+    public class LineModel
     {
         private List<Coordinates> Points { get; set; }
 
-        public Line()
+        public LineModel()
         {
             this.Points = new List<Coordinates>();
         }
@@ -28,7 +28,7 @@ namespace FlowChartBuilder.Models
             Points.Insert(0, new Coordinates(x, y));
         }
 
-        public Line(Line line)
+        public LineModel(LineModel line)
         {
             this.Points = new List<Coordinates>();
             foreach (var point in line.GetPointsOfLine())

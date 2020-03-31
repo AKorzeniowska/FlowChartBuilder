@@ -1,5 +1,6 @@
 ﻿using FlowChartBuilder;
 using FlowChartBuilder.Helpers;
+using FlowChartBuilder.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,17 +23,21 @@ namespace UI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static readonly int _rectangleWidth = 30;
-        private static readonly int _rectangleHeight = 30;
+        private static readonly int _rectangleWidth = 20;
+        private static readonly int _rectangleHeight = 20;
         private static readonly int _lineThickness = 3;
+        private static readonly int _multiplier = 25;
 
-        private List<FlowChartBuilder.Models.Line> Lines { get; set; }
+        private List<LineModel> Lines { get; set; }
         private List<INode> Nodes { get; set; } 
+        private List<VectorModel> Vectors { get; set; }
         public MainWindow()
         {
             InitializeComponent();
 
-            var path = AppDomain.CurrentDomain.BaseDirectory + @"testfiles\test2.txt";
+            this.Vectors = new List<VectorModel>();
+
+            var path = AppDomain.CurrentDomain.BaseDirectory + @"testfiles\test3.txt";
             var list = TextFileParser.ParseText(path.Replace(@"UI\bin\Debug\netcoreapp3.1\", ""));
             var grid = new BlockDistributor(list);
             grid.PrintGrid();
@@ -52,7 +57,7 @@ namespace UI
                 var points = line.GetPointsOfLine();
                 for (int i = 0; i < points.Count - 1; i++)
                 {
-                    AddLine(points[i].y, points[i + 1].y, points[i].x, points[i + 1].x);
+                    Vectors.Add(new VectorModel(new Coordinates(points[i].x * _multiplier, points[i].y * _multiplier), new Coordinates(points[i + 1].x * _multiplier, points[i + 1].y * _multiplier)));
                 }
             }
 
@@ -60,18 +65,50 @@ namespace UI
             {
                 AddBlock(node.GetPosition().y, node.GetPosition().x);
             }
+
+            foreach (var vector in Vectors)
+            {
+                AddLine(vector);
+            }
         }
-        private void AddLine(int x1, int x2, int y1, int y2)
+        private void AddLine(VectorModel vector)
         {
-            Line line = new Line();
+            int modifierx = 0;
+            int modifiery = 0;
+
+            var x = Vectors.Where(x => ((x.Start.y < vector.Start.y && x.End.y > vector.Start.y) || (x.Start.y < vector.End.y && x.End.y > vector.End.y)) && IsVertical(x)).ToList();
+            var y = Vectors.Where(x => ((x.Start.x < vector.Start.x && x.End.x > vector.Start.x) || (x.Start.x < vector.End.x && x.End.x > vector.End.x)) && !IsVertical(x)).ToList();
+
+            if (IsVertical(vector) && Vectors.Where(x => ((x.Start.y < vector.Start.y && x.End.y > vector.Start.y) || (x.Start.y < vector.End.y && x.End.y > vector.End.y)) && IsVertical(x)).Count() >= 2)
+            {
+                modifierx = 20;
+                vector.End.x += 20;
+                vector.Start.x += 20;
+            }
+
+            if (!IsVertical(vector) && Vectors.Where(x => ((x.Start.x < vector.Start.x && x.End.x > vector.Start.x) || (x.Start.x < vector.End.x && x.End.x > vector.End.x)) && !IsVertical(x)).Count() >= 2)
+            {
+                modifiery = 20;
+                vector.End.y += 20;
+                vector.Start.y += 20;
+            }
+
+            Line line = new System.Windows.Shapes.Line();
             line.StrokeThickness = _lineThickness;
             line.Stroke = System.Windows.Media.Brushes.Black;
-            line.X1 = x1 * 100 + _rectangleWidth / 2 + 20;
-            line.X2 = x2 * 100 + _rectangleWidth / 2 + 20;
-            line.Y1 = y1 * 100 + _rectangleHeight / 2 + 20;
-            line.Y2 = y2 * 100 + _rectangleHeight / 2 + 20;
+            line.X1 = vector.Start.y * _multiplier + _rectangleWidth / 2 + 20 + modifierx;
+            line.X2 = vector.End.y * _multiplier + _rectangleWidth / 2 + 20 + modifierx;
+            line.Y1 = vector.Start.x * _multiplier + _rectangleHeight / 2 + 20 + modifiery;
+            line.Y2 = vector.End.x * _multiplier + _rectangleHeight / 2 + 20 + modifiery;
 
             myCanvas.Children.Add(line);
+        }
+
+        private bool IsVertical(VectorModel vector)
+        {
+            if (vector.Start.x == vector.End.x)
+                return false;
+            return true;
         }
 
         private void AddBlock(int x, int y)//, Type type)
@@ -83,8 +120,8 @@ namespace UI
             rect.StrokeThickness = _lineThickness;
 
             myCanvas.Children.Add(rect);
-            Canvas.SetTop(rect, y * 100 + 20);
-            Canvas.SetLeft(rect, x * 100 + 20);
+            Canvas.SetTop(rect, y * _multiplier + 20);
+            Canvas.SetLeft(rect, x * _multiplier + 20);
         }
     }
 }

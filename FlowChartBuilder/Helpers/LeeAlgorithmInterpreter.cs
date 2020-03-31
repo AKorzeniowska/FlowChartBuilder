@@ -52,11 +52,11 @@ namespace FlowChartBuilder.Helpers
             int rowIndex,
             int columnIndex,
             int count,
-            Line visited,
+            LineModel visited,
             int[][] Moves,
             int maxMoves,
             ref int lowest,
-            ref Line optimalVisited)
+            ref LineModel optimalVisited)
         {
 
             if (lowest <= 3) return 1;
@@ -93,7 +93,7 @@ namespace FlowChartBuilder.Helpers
                         {
                             array[newRow][newColumn] = value + 1;
                             // Try another move.
-                            var visitedDeepCopy = new Line(visited);
+                            var visitedDeepCopy = new LineModel(visited);
                             visitedDeepCopy.AddPointToLine(newRow, newColumn);
                             Move(array, newRow, newColumn, count + 1, visitedDeepCopy, Moves, maxMoves, ref lowest, ref optimalVisited);
                         }
@@ -102,7 +102,7 @@ namespace FlowChartBuilder.Helpers
                             if (count + 1 < lowest)
                             {
                                 lowest = count + 1;
-                                var visitedDeepCopy = new Line(visited);
+                                var visitedDeepCopy = new LineModel(visited);
                                 visitedDeepCopy.AddPointToLine(newRow, newColumn);
                                 optimalVisited = visitedDeepCopy;
                             }
@@ -114,10 +114,10 @@ namespace FlowChartBuilder.Helpers
             return -1;
         }
 
-        public static Line DoYourJob(int[,] maze, int[][] moves, int maxMoves)
+        public static LineModel DoYourJob(int[,] maze, int[][] moves, int maxMoves)
         {
             var array = GetMazeArray(maze, maze.GetLength(0), maze.GetLength(1));
-            var visited = new Line();
+            var visited = new LineModel();
             // Get start position.
             for (int i = 0; i < array.Length; i++)
             {
@@ -136,7 +136,7 @@ namespace FlowChartBuilder.Helpers
                         //    Move(array, i, x, 0, new Line(), MovesProvider._reversedMoves, ref lowest, ref visited);
                         //else
                             //Move(array, i, x, 0, new Line(), MovesProvider._moves, ref lowest, ref visited);
-                        Move(array, i, x, 0, new Line(), moves, maxMoves, ref lowest, ref visited);
+                        Move(array, i, x, 0, new LineModel(), moves, maxMoves, ref lowest, ref visited);
 
                         sw.Stop();
                         Console.WriteLine("Elapsed={0}", sw.Elapsed);

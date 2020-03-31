@@ -27,11 +27,11 @@ namespace FlowChartBuilder.Helpers
             var numberOfProcessNodes = nodes.OfType<ProcessNode>().Count();
 
             this.GridHeight = 2 * nodes.Count();
-            this.GridWidth = 2 * (numberOfDecisionNodes * 6 + 3);
+            this.GridWidth = 2 * (numberOfDecisionNodes * 50 + 3);
             this.Grid = new int[GridHeight, GridWidth];
 
             var startingNode = nodes.OfType<StartingNode>().FirstOrDefault() as StartingNode;
-            var xPositioner = Convert.ToInt32((GridWidth) / 4);
+            var xPositioner = Convert.ToInt32((GridWidth) / 2);
             var yPositioner = 0;
             this.Grid[yPositioner, xPositioner] = startingNode.GetId();
             visited = new List<int>();
@@ -85,8 +85,8 @@ namespace FlowChartBuilder.Helpers
                 INode nextLeftNode = GetNodeById((root as DecisionNode).GetLeftFollowingNodeId());
                 INode nextRightNode = GetNodeById((root as DecisionNode).GetRightFollowingNodeId());
 
-                int xLeftPositioner = xPositioner - (8 / level);//(64 / level == 64 ? 32 : 16 / level);
-                int xRightPositioner = xPositioner + (8 / level);//(64 / level == 64 ? 32 : 16 / level);
+                int xLeftPositioner = xPositioner - (64 / level == 64 ? 32 : 16 / level);
+                int xRightPositioner = xPositioner + (64 / level == 64 ? 32 : 16 / level);
                 while (this.Grid[yPositioner + 2, xLeftPositioner] != 0)
                 {
                     xLeftPositioner += 1;
@@ -158,8 +158,8 @@ namespace FlowChartBuilder.Helpers
                 INode nextRightNode = GetNodeById((root as DecisionNode).GetRightFollowingNodeId());
 
                 //TODO: ZMIANKA
-                int xLeftPositioner = xPositioner - (4 / depth + 1);
-                int xRightPositioner = xPositioner + (4 / depth + 1);
+                int xLeftPositioner = xPositioner - (32 / depth + 1);
+                int xRightPositioner = xPositioner + (32 / depth + 1);
 
                 if (this.DecisionNodes.Contains(level))
                     depth *= 2;
