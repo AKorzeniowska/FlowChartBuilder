@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 
 namespace FlowChartBuilder.Helpers
 {
@@ -48,22 +49,44 @@ namespace FlowChartBuilder.Helpers
             return true;
         }
 
-        static int Move(int[][] arrayTemp,
+        int Move(int[][] arrayTemp,
             int rowIndex,
             int columnIndex,
             int count,
+            int turnsCount,
             LineModel visited,
             int[][] Moves,
             int maxMoves,
+            int optTurns,
+            int[] lastMove,
             ref int lowest,
+            ref int leastTurns, 
             ref LineModel optimalVisited)
         {
 
-            if (lowest <= 3) return 1;
-            if (count > arrayTemp.Length + arrayTemp[0].Length) return 1;
-            if (count + 1 > lowest) return 1;
-            if (count + 1 > maxMoves) return 1;
-            // Copy map so we can modify it and then abandon it.
+            if (leastTurns <= optTurns)
+            {
+                return 1;
+            }
+            if (optimalVisited.GetPointsOfLine().Count <= 3 && optimalVisited.GetPointsOfLine().Count != 0)
+            {
+                return 1;
+            }
+            if (count > arrayTemp.Length + arrayTemp[0].Length)
+            {
+                return 1;
+            }
+            if (count + 1 >= optimalVisited.GetPointsOfLine().Count && optimalVisited.GetPointsOfLine().Count != 0) 
+            { 
+                return 1; 
+            }
+            if (count + 1 > maxMoves)
+            {
+                return 1;
+            }
+            
+            if (turnsCount > leastTurns) return 1; //hmmmmmmm
+
             int[][] array = new int[arrayTemp.Length][];
             for (int i = 0; i < arrayTemp.Length; i++)
             {
@@ -78,10 +101,6 @@ namespace FlowChartBuilder.Helpers
             int value = array[rowIndex][columnIndex];
             if (value >= 1)
             {
-            //    Display(array);
-            //    Console.WriteLine();
-            //    Console.WriteLine(count);
-                // Try all moves.
                 foreach (var movePair in Moves)
                 {
                     int newRow = rowIndex + movePair[0];
@@ -92,19 +111,33 @@ namespace FlowChartBuilder.Helpers
                         if (testValue == 0)
                         {
                             array[newRow][newColumn] = value + 1;
-                            // Try another move.
+                            // Try another move
                             var visitedDeepCopy = new LineModel(visited);
                             visitedDeepCopy.AddPointToLine(newRow, newColumn);
-                            Move(array, newRow, newColumn, count + 1, visitedDeepCopy, Moves, maxMoves, ref lowest, ref optimalVisited);
+                            if (lastMove != null && lastMove[0] != movePair[0] && lastMove[1] != movePair[1])
+                                Move(array, newRow, newColumn, count + 1, turnsCount + 1, visitedDeepCopy, Moves, maxMoves, optTurns, movePair, ref lowest, ref leastTurns, ref optimalVisited);
+                            else
+                                Move(array, newRow, newColumn, count + 1, turnsCount, visitedDeepCopy, Moves, maxMoves, optTurns, movePair, ref lowest, ref leastTurns, ref optimalVisited);
                         }
                         else if (testValue == -3)
                         {   
                             if (count + 1 < lowest)
                             {
-                                lowest = count + 1;
-                                var visitedDeepCopy = new LineModel(visited);
-                                visitedDeepCopy.AddPointToLine(newRow, newColumn);
-                                optimalVisited = visitedDeepCopy;
+                                //lock (this)
+                                //{
+                                    lowest = count + 1;
+                                    var visitedDeepCopy = new LineModel(visited);
+                                    visitedDeepCopy.AddPointToLine(newRow, newColumn);
+                                    optimalVisited = visitedDeepCopy;
+                                    if (lastMove != null && lastMove[0] != movePair[0] && lastMove[1] != movePair[1] && turnsCount + 1 < leastTurns)
+                                    {
+                                        leastTurns = turnsCount + 1;
+                                    }
+                                    else if (turnsCount < leastTurns)
+                                    {
+                                        leastTurns = turnsCount;
+                                    }
+                                //}
                             }
                             return 1;
                         }
@@ -114,8 +147,9 @@ namespace FlowChartBuilder.Helpers
             return -1;
         }
 
-        public static LineModel DoYourJob(int[,] maze, int[][] moves, int maxMoves)
+        public LineModel DoYourJob(int[,] maze, int[][] moves1, int[][] moves2, int maxMoves, int optTurns, int id)
         {
+            Console.WriteLine("NUMEREK " + id);
             var array = GetMazeArray(maze, maze.GetLength(0), maze.GetLength(1));
             var visited = new LineModel();
             // Get start position.
@@ -129,18 +163,30 @@ namespace FlowChartBuilder.Helpers
                     if (row[x] == 1)
                     {
                         int lowest = int.MaxValue;
+                        int leastTurns = int.MaxValue;
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
 
-                        //if (useReversedMoves)
-                        //    Move(array, i, x, 0, new Line(), MovesProvider._reversedMoves, ref lowest, ref visited);
-                        //else
-                            //Move(array, i, x, 0, new Line(), MovesProvider._moves, ref lowest, ref visited);
-                        Move(array, i, x, 0, new LineModel(), moves, maxMoves, ref lowest, ref visited);
+                        var t1 = new Thread(delegate ()
+                        {
+                            Move(array, i, x, 0, 0, new LineModel(), moves1, maxMoves, optTurns, null, ref leastTurns, ref lowest, ref visited);
+                        });
+                        t1.Start();
+
+                        var t2 = new Thread(delegate ()
+                        {
+                            Move(array, i, x, 0, 0, new LineModel(), moves2, maxMoves, optTurns, null, ref leastTurns, ref lowest, ref visited);
+                        });
+                        t2.Start();
+
+                        //Move(array, i, x, 0, 0, new LineModel(), moves, maxMoves, optTurns, null, ref leastTurns, ref lowest, ref visited);
+
+                        t1.Join();
+                        t2.Join();
 
                         sw.Stop();
                         Console.WriteLine("Elapsed={0}", sw.Elapsed);
-                        Console.WriteLine($"Optimal moves: {lowest}");
+                        Console.WriteLine($"Optimal moves: {visited.GetPointsOfLine().Count}");
                         visited.DisplayLine();
                     }
                 }

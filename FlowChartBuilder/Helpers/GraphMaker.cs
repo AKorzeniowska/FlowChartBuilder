@@ -53,7 +53,7 @@ namespace FlowChartBuilder.Helpers
 
 
             //var gridCopy = Grid.Clone() as int[,];
-
+            int id = 1;
             foreach (var connection in Connections)
             {
                 var gridCopy = Grid.Clone() as int[,];
@@ -83,28 +83,37 @@ namespace FlowChartBuilder.Helpers
                 }
 
                 LineModel newLine = null;
-                int[][] moves = null;
+                int[][] moves1 = null;
+                int[][] moves2 = null;
+
                 if (x1 > x2 && y1 >= y2)
                 {
-                    moves = MovesProvider.UpLeft;
+                    moves1 = MovesProvider.UpLeft;
+                    moves2 = MovesProvider.LeftUp;
                 }
                 else if (x1 > x2 && y1 < y2)
                 {
-                    moves = MovesProvider.UpRight;
+                    moves1 = MovesProvider.UpRight;
+                    moves2 = MovesProvider.RightUp;
                 }
                 else if (x1 <= x2 && y1 >= y2)
                 {
-                    moves = MovesProvider.DownLeft;
+                    moves1 = MovesProvider.DownLeft;
+                    moves2 = MovesProvider.LeftDown;
                 }
                 else if (x1 <= x2 && y1 < y2)
                 {
-                    moves = MovesProvider.DownRight;
+                    moves1 = MovesProvider.DownRight;
+                    moves2 = MovesProvider.RightDown;
                 }
 
-                newLine = LeeAlgorithmInterpreter.DoYourJob(gridCopy, moves, (Math.Abs(x1 - x2) + Math.Abs(y1 - y2)) + 4);
+                var optTurns = Math.Abs(x1 - x2) == 0 || Math.Abs(y1 - y2) == 0 ? 0 : 1;
+
+                newLine = new LeeAlgorithmInterpreter().DoYourJob(gridCopy, moves1, moves2, (Math.Abs(x1 - x2) + Math.Abs(y1 - y2)) + 4, optTurns, id);
                 newLine.AddPointAtStartOfLine(x1, y1);
                 Lines.Add(newLine);
 
+                id++;
                 //gridCopy = Grid.Clone() as int[,];
                 //foreach (var line in Lines)
                 //{

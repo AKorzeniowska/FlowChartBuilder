@@ -35,9 +35,8 @@ namespace FlowChartBuilder.Helpers
             var yPositioner = 0;
             this.Grid[yPositioner, xPositioner] = startingNode.GetId();
             visited = new List<int>();
+            visited.Add(startingNode.GetId());
             SetSubtree(yPositioner, xPositioner, startingNode, 1);
-
-            Console.WriteLine("XD");
 
             this.DecisionNodes = GetLevelsWithdecisionNodes();
             this.Grid = new int[GridHeight, GridWidth];
@@ -47,14 +46,15 @@ namespace FlowChartBuilder.Helpers
             yPositioner = 0;
             this.Grid[yPositioner, xPositioner] = startingNode.GetId();
             visited = new List<int>();
+            visited.Add(startingNode.GetId());
             SetSubtreeSecondIteration(yPositioner, xPositioner, startingNode, 0, 1);
         }
 
         private void SetSubtree(int yPositioner, int xPositioner, INode root, int level)
         {
-            if (visited.Contains(root.GetId()))
-                return;
-            visited.Add(root.GetId());
+            //if (visited.Contains(root.GetId()))
+            //    return;
+            //visited.Add(root.GetId());
 
             if (root.GetType() == typeof(EndingNode))
             {
@@ -68,6 +68,7 @@ namespace FlowChartBuilder.Helpers
                 if (visited.Contains(nextNode.GetId()))
                     return;
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
+                visited.Add(nextNode.GetId());
                 SetSubtree(yPositioner + 2, xPositioner, nextNode, level);
             }
 
@@ -77,6 +78,7 @@ namespace FlowChartBuilder.Helpers
                 if (visited.Contains(nextNode.GetId()))
                     return;
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
+                visited.Add(nextNode.GetId());
                 SetSubtree(yPositioner + 2, xPositioner, nextNode, level);
             }
 
@@ -98,7 +100,9 @@ namespace FlowChartBuilder.Helpers
                 if (!visited.Contains(nextLeftNode.GetId()) && !visited.Contains(nextRightNode.GetId()))
                 {
                     this.Grid[yPositioner + 2, xLeftPositioner] = nextLeftNode.GetId();
+                    visited.Add(nextLeftNode.GetId());
                     this.Grid[yPositioner + 2, xRightPositioner] = nextRightNode.GetId();
+                    visited.Add(nextRightNode.GetId());
                     SetSubtree(yPositioner + 2, xRightPositioner, nextRightNode, level + 1);
                     SetSubtree(yPositioner + 2, xLeftPositioner, nextLeftNode, level + 1);
                 }
@@ -107,11 +111,13 @@ namespace FlowChartBuilder.Helpers
                     if (!visited.Contains(nextRightNode.GetId()))
                     {
                         this.Grid[yPositioner + 2, xPositioner] = nextRightNode.GetId();
+                        visited.Add(nextRightNode.GetId());
                         SetSubtree(yPositioner + 2, xPositioner, nextRightNode, level);
                     }
                     if (!visited.Contains(nextLeftNode.GetId()))
                     {
                         this.Grid[yPositioner + 2, xPositioner] = nextLeftNode.GetId();
+                        visited.Add(nextLeftNode.GetId());
                         SetSubtree(yPositioner + 2, xPositioner, nextLeftNode, level);
                     }
                 }
@@ -120,9 +126,9 @@ namespace FlowChartBuilder.Helpers
 
         private void SetSubtreeSecondIteration(int yPositioner, int xPositioner, INode root, int level, int depth)
         {
-            if (visited.Contains(root.GetId()))
-                return;
-            visited.Add(root.GetId());
+            //if (visited.Contains(root.GetId()))
+            //    return;
+            //visited.Add(root.GetId());
 
             if (root.GetType() == typeof(EndingNode))
             {
@@ -136,6 +142,7 @@ namespace FlowChartBuilder.Helpers
                 if (visited.Contains(nextNode.GetId()))
                     return;
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
+                visited.Add(nextNode.GetId());
                 if (this.DecisionNodes.Contains(level))
                     depth *= 2;
                 SetSubtreeSecondIteration(yPositioner + 2, xPositioner, nextNode, level + 1, depth);
@@ -147,6 +154,7 @@ namespace FlowChartBuilder.Helpers
                 if (visited.Contains(nextNode.GetId()))
                     return;
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
+                visited.Add(nextNode.GetId());
                 if (this.DecisionNodes.Contains(level))
                     depth *= 2;
                 SetSubtreeSecondIteration(yPositioner + 2, xPositioner, nextNode, level + 1, depth);
@@ -177,7 +185,9 @@ namespace FlowChartBuilder.Helpers
                     //xRightPositioner += 1;
                     //xLeftPositioner -= 1;
                     this.Grid[yPositioner + 2, xLeftPositioner] = nextLeftNode.GetId();
+                    visited.Add(nextLeftNode.GetId());
                     this.Grid[yPositioner + 2, xRightPositioner] = nextRightNode.GetId();
+                    visited.Add(nextRightNode.GetId());
                     SetSubtreeSecondIteration(yPositioner + 2, xRightPositioner, nextRightNode, level + 1, depth);
                     SetSubtreeSecondIteration(yPositioner + 2, xLeftPositioner, nextLeftNode, level + 1, depth);
                 }
@@ -186,11 +196,13 @@ namespace FlowChartBuilder.Helpers
                     if (!visited.Contains(nextRightNode.GetId()))
                     {
                         this.Grid[yPositioner + 2, xPositioner] = nextRightNode.GetId();
+                        visited.Add(nextRightNode.GetId());
                         SetSubtreeSecondIteration(yPositioner + 2, xPositioner, nextRightNode, level + 1, depth);
                     }
                     if (!visited.Contains(nextLeftNode.GetId()))
                     {
                         this.Grid[yPositioner + 2, xPositioner] = nextLeftNode.GetId();
+                        visited.Add(nextLeftNode.GetId());
                         SetSubtreeSecondIteration(yPositioner + 2, xPositioner, nextLeftNode, level + 1, depth);
                     }
                 }

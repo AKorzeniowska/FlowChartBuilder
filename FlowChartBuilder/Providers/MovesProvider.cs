@@ -6,18 +6,6 @@ namespace FlowChartBuilder.Providers
 {
     public static class MovesProvider
     {
-        public static int[][] _moves = {
-                new int[] { 1, 0 },
-                new int[] { 0, -1 },
-                new int[] { 0, 1 },
-                new int[] { -1, 0 } };
-
-        public static int[][] _reversedMoves = {
-                new int[] { -1, 0 },
-                new int[] { 0, -1 },
-                new int[] { 0, 1 },
-                new int[] { 1, 0 } };
-
         public static int[][] DownRight =
         {
                 new int[] { 1, 0 },
@@ -46,6 +34,38 @@ namespace FlowChartBuilder.Providers
         {
                 new int[] { -1, 0 },
                 new int[] { 0, -1 },
+                new int[] { 0, 1 },
+                new int[] { 1, 0 }
+        };
+
+        public static int[][] RightDown =
+        {
+                new int[] { 0, 1 },
+                new int[] { 1, 0 },
+                new int[] { 0, -1 },
+                new int[] { -1, 0 }
+        };
+
+        public static int[][] LeftDown =
+        {
+                new int[] { 0, -1 },
+                new int[] { 1, 0 },
+                new int[] { 0, 1 },
+                new int[] { -1, 0 }
+        };
+
+        public static int[][] RightUp =
+        {
+                new int[] { 0, 1 },
+                new int[] { -1, 0 },
+                new int[] { 0, -1 },
+                new int[] { 1, 0 }
+        };
+
+        public static int[][] LeftUp =
+        {
+                new int[] { 0, -1 },
+                new int[] { -1, 0 },
                 new int[] { 0, 1 },
                 new int[] { 1, 0 }
         };
