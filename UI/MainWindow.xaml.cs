@@ -3,6 +3,7 @@ using FlowChartBuilder.Helpers;
 using FlowChartBuilder.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -26,8 +27,8 @@ namespace UI
     {
         private static readonly int _rectangleWidth = 20;
         private static readonly int _rectangleHeight = 20;
-        private static readonly int _lineThickness = 3;
-        private static readonly int _multiplier = 30;
+        private static readonly int _lineThickness = 2;
+        private static readonly int _multiplier = 20;
 
         private List<LineModel> Lines { get; set; }
         private List<INode> Nodes { get; set; } 
@@ -47,14 +48,21 @@ namespace UI
                 BrushesArray[i] = PickBrush();
             }
 
-            var path = AppDomain.CurrentDomain.BaseDirectory + @"testfiles\test3.txt";
-            var list = TextFileParser.ParseText(path.Replace(@"UI\bin\Debug\netcoreapp3.1\", ""));
+            //var path = AppDomain.CurrentDomain.BaseDirectory + @"testfiles\test3.txt";
+            var path = (AppDomain.CurrentDomain.BaseDirectory + @"Examples\and.gsa").Replace(@"UI\bin\Debug\netcoreapp3.1\", "");
+            var list = TextFileParser.ParseText(path);//.Replace(@"UI\bin\Debug\netcoreapp3.1\", ""));
             var grid = new BlockDistributor(list);
             grid.RemoveEmptyLines();
+            grid.PrintGrid();
             grid.SetNodesPositions();
 
             var graph = new GraphMaker(grid.GetNodes(), grid.GetGrid());
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             graph.LineCreator();
+            sw.Stop();
+            Console.WriteLine("ElapsedTotal={0}", sw.Elapsed);
+
             graph.RemoveMiddlePointsFromLines();
 
             this.Lines = graph.GetLines();
@@ -80,7 +88,12 @@ namespace UI
 
             while (this.Recheck.Count != 0)
             {
-                AddLine(this.Recheck.Dequeue());
+                var recheck = this.Recheck.Dequeue();
+                if (recheck.GetChangeNumber() < 5)
+                {
+                    recheck.AddChange();
+                    AddLine(recheck);
+                }
             }
 
             foreach (var vector in Vectors)
@@ -90,7 +103,7 @@ namespace UI
 
             foreach (var node in Nodes)
             {
-                AddBlock(node.GetPosition().y, node.GetPosition().x, node.GetId());
+                AddBlock(node.GetPosition().y, node.GetPosition().x, node.GetId(), node.GetType());
             }
         }
 
@@ -104,10 +117,12 @@ namespace UI
 
             if (x.Count >= 1 && !IsVertical(vector))
             {
-                if (x.Count % 2 == 0)
-                    MoveVectorsWithId(vector.Id, mover * (int)x.Count / 2, 0);
+
+                vector.AddChange();
+                if (x.Count % 2 != 0 || vector.GetChangeNumber() % 2 != 0)
+                    MoveVectorsWithId(vector.Id, -mover * (int)(x.Count + 1 / 2 + vector.GetChangeNumber() / 2), 0);
                 else
-                    MoveVectorsWithId(vector.Id, -mover * (int)(x.Count + 1) / 2, 0);
+                    MoveVectorsWithId(vector.Id, mover * (int)(x.Count / 2 + vector.GetChangeNumber() / 2), 0);
                 if (!this.Recheck.Where(x => x.Id == vector.Id).Any())
                 {
                     foreach (var recheck in Vectors.Where(x => x.Id == vector.Id))
@@ -120,12 +135,12 @@ namespace UI
 
             if (y.Count >= 1 && IsVertical(vector))
             {
-                if (y.Count % 2 == 0)
-                    //VectorMap.MoveAllVectorsWithId(vector.Id, 0, mover * (int) y.Count/2);
-                    MoveVectorsWithId(vector.Id, 0, mover * (int)y.Count / 2);
-                else
-                    //VectorMap.MoveAllVectorsWithId(vector.Id, 0, -mover * (int) (y.Count + 1) / 2);
+                vector.AddChange();
+                if (y.Count % 2 != 0 || vector.GetChangeNumber() % 2 != 0)
                     MoveVectorsWithId(vector.Id, 0, -mover * (int)(y.Count + 1) / 2);
+                else
+                    MoveVectorsWithId(vector.Id, 0, mover * (int)y.Count / 2);
+
                 if (!this.Recheck.Where(x => x.Id == vector.Id).Any())
                 {
                     foreach (var recheck in Vectors.Where(x => x.Id == vector.Id))
@@ -141,7 +156,8 @@ namespace UI
         {
             Line line = new System.Windows.Shapes.Line();
             line.StrokeThickness = _lineThickness;
-            line.Stroke = BrushesArray[vector.Id];
+            //line.Stroke = BrushesArray[vector.Id];
+            line.Stroke = Brushes.Black;
             line.X1 = vector.Start.y + _rectangleWidth / 2 + 20;
             line.X2 = vector.End.y + _rectangleWidth / 2 + 20;
             line.Y1 = vector.Start.x + _rectangleHeight / 2 + 20;
@@ -169,10 +185,19 @@ namespace UI
             return true;
         }
 
-        private void AddBlock(int x, int y, int id)//, Type type)
+        private void AddBlock(int x, int y, int id, Type type)
         {
             Rectangle rect = new Rectangle();
-            rect.Stroke = new SolidColorBrush(Colors.Red);
+
+            if (type == typeof(StartingNode))
+                rect.Stroke = new SolidColorBrush(Colors.Green);
+            else if (type == typeof(ProcessNode))
+                rect.Stroke = new SolidColorBrush(Colors.Blue);
+            else if (type == typeof(DecisionNode))
+                rect.Stroke = new SolidColorBrush(Colors.Yellow);
+            else if (type == typeof(EndingNode))
+                rect.Stroke = new SolidColorBrush(Colors.Red);
+
             rect.Fill = new SolidColorBrush(Colors.White);
             rect.Width = _rectangleWidth;
             rect.Height = _rectangleHeight;
@@ -182,6 +207,7 @@ namespace UI
             textBlock.Height = _rectangleHeight - _lineThickness;
             textBlock.Width = _rectangleWidth - _lineThickness;
             textBlock.Inlines.Add(new Run(id.ToString()));
+            textBlock.TextAlignment = TextAlignment.Center;
 
             myCanvas.Children.Add(rect);
             Canvas.SetTop(rect, y * _multiplier + 20);

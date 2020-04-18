@@ -7,6 +7,7 @@ namespace FlowChartBuilder.Models
     public class LineModel
     {
         private List<Coordinates> Points { get; set; }
+        public bool IsReversed { get; set; }
 
         public LineModel()
         {
@@ -25,9 +26,23 @@ namespace FlowChartBuilder.Models
 
         public void AddPointAtStartOfLine(int x, int y)
         {
-            Points.Insert(0, new Coordinates(x, y));
+            Points.Insert(0, new Coordinates(x, y, true));
         }
 
+        public void AddPointAtEndOfLine(int x, int y)
+        {
+            Points.Insert(0, new Coordinates(x, y, false));
+        }
+
+        public LineModel(LineModel line, bool isReversed)
+        {
+            this.Points = new List<Coordinates>();
+            foreach (var point in line.GetPointsOfLine())
+            {
+                this.Points.Add(new Coordinates(point.x, point.y));
+            }
+            this.IsReversed = isReversed;
+        }
         public LineModel(LineModel line)
         {
             this.Points = new List<Coordinates>();

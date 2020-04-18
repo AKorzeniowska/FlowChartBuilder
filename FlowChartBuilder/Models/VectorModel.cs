@@ -22,7 +22,8 @@ namespace FlowChartBuilder.Models
 
         public Coordinates Start { get; set; }
         public Coordinates End { get; set; }
-        public int Id { get; set; }
+        public int Id { get; set; } = 0;
+        public int ChangeNumber { get; set; }
 
         public bool Equals(VectorModel other)
         {
@@ -33,6 +34,16 @@ namespace FlowChartBuilder.Models
             if (this.End.x != other.End.x || this.End.y != other.End.y)
                 return false;
             return true;
+        }
+
+        public int GetChangeNumber()
+        {
+            return this.ChangeNumber;
+        }
+
+        public void AddChange()
+        {
+            this.ChangeNumber++;
         }
     }
 }

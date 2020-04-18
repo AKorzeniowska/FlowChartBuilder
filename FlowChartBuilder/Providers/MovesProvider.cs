@@ -69,5 +69,18 @@ namespace FlowChartBuilder.Providers
                 new int[] { 0, 1 },
                 new int[] { 1, 0 }
         };
+
+        public static int[][] GetReversedMoves(int[][] moves)
+        {
+            if (moves == DownRight) return LeftUp;
+            if (moves == DownLeft) return RightUp;
+            if (moves == UpRight) return LeftDown;
+            if (moves == UpLeft) return RightDown;
+            if (moves == RightDown) return UpLeft;
+            if (moves == RightUp) return DownLeft;
+            if (moves == LeftDown) return UpRight;
+            if (moves == LeftUp) return DownRight;
+            return DownRight;
+        }
     }
 }

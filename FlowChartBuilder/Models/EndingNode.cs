@@ -27,5 +27,15 @@ namespace FlowChartBuilder.Models
         {
             return this.Position;
         }
+
+        public void IncreaseId()
+        {
+            this.Id++;
+        }
+
+        public bool IsNodeSelfJoining()
+        {
+            return false;
+        }
     }
 }

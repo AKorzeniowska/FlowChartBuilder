@@ -8,7 +8,9 @@ namespace FlowChartBuilder
     public interface INode
     {
         int GetId();
+        void IncreaseId();
         void SetPosition(int x, int y);
         Coordinates GetPosition();
+        bool IsNodeSelfJoining();
     }
 }

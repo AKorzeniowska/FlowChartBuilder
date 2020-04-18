@@ -30,6 +30,16 @@ namespace FlowChartBuilder.Models
             this.RightFollowingNodeCondition = condition;
         }
 
+        public void AddLeftNode(int nodeId)
+        {
+            this.LeftFollowingNodeId = nodeId;
+        }
+
+        public void AddRightNode(int nodeId)
+        {
+            this.RightFollowingNodeId = nodeId;
+        }
+
         public int GetId()
         {
             return this.Id;
@@ -51,6 +61,18 @@ namespace FlowChartBuilder.Models
         public Coordinates GetPosition()
         {
             return this.Position;
+        }
+
+        public void IncreaseId()
+        {
+            this.Id++;
+            this.LeftFollowingNodeId++;
+            this.RightFollowingNodeId++;
+        }
+
+        public bool IsNodeSelfJoining()
+        {
+            return (this.Id == this.LeftFollowingNodeId || this.Id == this.RightFollowingNodeId);
         }
     }
 }

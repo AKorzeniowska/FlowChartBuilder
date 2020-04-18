@@ -15,7 +15,7 @@ namespace FlowChartBuilder.Helpers
         private int GridWidth { get; set; }
         private List<int> DecisionNodes { get; set; }
 
-        public BlockDistributor(IEnumerable<INode> nodes)
+        public BlockDistributor(List<INode> nodes)
         {
             if (!nodes.OfType<StartingNode>().Any() || nodes.OfType<StartingNode>().Count() > 1)
                 return;
@@ -26,7 +26,7 @@ namespace FlowChartBuilder.Helpers
             var numberOfDecisionNodes = nodes.OfType<DecisionNode>().Count();
             var numberOfProcessNodes = nodes.OfType<ProcessNode>().Count();
 
-            this.GridHeight = 2 * nodes.Count();
+            this.GridHeight = 2 * nodes.Count() + 4;
             this.GridWidth = 2 * (numberOfDecisionNodes * 50 + 3);
             this.Grid = new int[GridHeight, GridWidth];
 
@@ -48,6 +48,44 @@ namespace FlowChartBuilder.Helpers
             visited = new List<int>();
             visited.Add(startingNode.GetId());
             SetSubtreeSecondIteration(yPositioner, xPositioner, startingNode, 0, 1);
+
+
+            //TODO: Obsługa self-joinów przez tworzenie sztucznych trzech punktów dookoła
+            SetNodesPositions();
+
+            var selfJoined = nodes.Where(x => x.IsNodeSelfJoining()).ToList();
+            foreach (var sj in selfJoined)
+            {
+                var nextId = nodes.Max(x => x.GetId()) + 1;
+                var firstSubNode = new SubsidiaryNode(nextId, nextId + 1);
+                firstSubNode.SetPosition(sj.GetPosition().x - 1, sj.GetPosition().y);
+                if (sj.GetType() == typeof(ProcessNode))
+                {
+                    (sj as ProcessNode).AddFollowingNode(nextId);
+                }
+                else if (sj.GetType() == typeof(StartingNode))
+                {
+                    (sj as StartingNode).AddFollowingNode(nextId);
+                }
+                else if (sj.GetType() == typeof(DecisionNode))
+                {
+                    var decisNode = sj as DecisionNode;
+                    if (decisNode.GetLeftFollowingNodeId() == decisNode.GetId())
+                        decisNode.AddLeftNode(nextId);
+                    else
+                        decisNode.AddRightNode(nextId);
+                }
+                var secondSubNode = new SubsidiaryNode(nextId + 1, nextId + 2);
+                secondSubNode.SetPosition(sj.GetPosition().x - 1, sj.GetPosition().y - 1);
+                var thirdSubNode = new SubsidiaryNode(nextId + 2, sj.GetId());
+                thirdSubNode.SetPosition(sj.GetPosition().x, sj.GetPosition().y - 1);
+                this.Nodes.Add(firstSubNode);
+                this.Nodes.Add(secondSubNode);
+                this.Nodes.Add(thirdSubNode);
+                this.Grid[firstSubNode.GetPosition().x, firstSubNode.GetPosition().y] = firstSubNode.GetId();
+                this.Grid[secondSubNode.GetPosition().x, secondSubNode.GetPosition().y] = secondSubNode.GetId();
+                this.Grid[thirdSubNode.GetPosition().x, thirdSubNode.GetPosition().y] = thirdSubNode.GetId();
+            }
         }
 
         private void SetSubtree(int yPositioner, int xPositioner, INode root, int level)
@@ -124,11 +162,20 @@ namespace FlowChartBuilder.Helpers
             }
         }
 
+        private void SetEndingNode(INode node)
+        {
+            this.Grid[GridHeight - 1, Convert.ToInt32((GridWidth) / 2)] = node.GetId();
+            Console.WriteLine("Starting succ: {0}, {1}, {2}", node.GetId(), GridHeight - 1, Convert.ToInt32((GridWidth) / 2));
+
+        }
+
         private void SetSubtreeSecondIteration(int yPositioner, int xPositioner, INode root, int level, int depth)
         {
             //if (visited.Contains(root.GetId()))
             //    return;
             //visited.Add(root.GetId());
+
+            if (this.Grid[yPositioner + 2, xPositioner] != 0) xPositioner++;
 
             if (root.GetType() == typeof(EndingNode))
             {
@@ -141,7 +188,12 @@ namespace FlowChartBuilder.Helpers
                 INode nextNode = Nodes.Find(x => x.GetId() == (root as StartingNode).GetFollowingNodeId());
                 if (visited.Contains(nextNode.GetId()))
                     return;
+                if (nextNode.GetType() == typeof(EndingNode)) {
+                    SetEndingNode(nextNode);
+                    return;
+                }
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
+                Console.WriteLine("Starting succ: {0}, {1}, {2}", nextNode.GetId(), yPositioner + 2, xPositioner);
                 visited.Add(nextNode.GetId());
                 if (this.DecisionNodes.Contains(level))
                     depth *= 2;
@@ -153,7 +205,13 @@ namespace FlowChartBuilder.Helpers
                 INode nextNode = Nodes.Find(x => x.GetId() == (root as ProcessNode).GetFollowingNodeId());
                 if (visited.Contains(nextNode.GetId()))
                     return;
+                if (nextNode.GetType() == typeof(EndingNode))
+                {
+                    SetEndingNode(nextNode);
+                    return;
+                }
                 this.Grid[yPositioner + 2, xPositioner] = nextNode.GetId();
+                Console.WriteLine("Process succ: {0}, {1}, {2}", nextNode.GetId(), yPositioner + 2, xPositioner);
                 visited.Add(nextNode.GetId());
                 if (this.DecisionNodes.Contains(level))
                     depth *= 2;
@@ -182,11 +240,11 @@ namespace FlowChartBuilder.Helpers
                 }
                 if (!visited.Contains(nextLeftNode.GetId()) && !visited.Contains(nextRightNode.GetId()))
                 {
-                    //xRightPositioner += 1;
-                    //xLeftPositioner -= 1;
                     this.Grid[yPositioner + 2, xLeftPositioner] = nextLeftNode.GetId();
+                    Console.WriteLine("Decision left succ: {0}, {1}, {2}", nextLeftNode.GetId(), yPositioner + 2, xLeftPositioner);
                     visited.Add(nextLeftNode.GetId());
                     this.Grid[yPositioner + 2, xRightPositioner] = nextRightNode.GetId();
+                    Console.WriteLine("Decision right succ: {0}, {1}, {2}", nextRightNode.GetId(), yPositioner + 2, xRightPositioner);
                     visited.Add(nextRightNode.GetId());
                     SetSubtreeSecondIteration(yPositioner + 2, xRightPositioner, nextRightNode, level + 1, depth);
                     SetSubtreeSecondIteration(yPositioner + 2, xLeftPositioner, nextLeftNode, level + 1, depth);
@@ -195,13 +253,25 @@ namespace FlowChartBuilder.Helpers
                 {
                     if (!visited.Contains(nextRightNode.GetId()))
                     {
+                        if (nextRightNode.GetType() == typeof(EndingNode))
+                        {
+                            SetEndingNode(nextRightNode);
+                            return;
+                        }
                         this.Grid[yPositioner + 2, xPositioner] = nextRightNode.GetId();
+                        Console.WriteLine("Decision right succ: {0}, {1}, {2}", nextRightNode.GetId(), yPositioner + 2, xPositioner);
                         visited.Add(nextRightNode.GetId());
                         SetSubtreeSecondIteration(yPositioner + 2, xPositioner, nextRightNode, level + 1, depth);
                     }
                     if (!visited.Contains(nextLeftNode.GetId()))
                     {
+                        if (nextLeftNode.GetType() == typeof(EndingNode))
+                        {
+                            SetEndingNode(nextLeftNode);
+                            return;
+                        }
                         this.Grid[yPositioner + 2, xPositioner] = nextLeftNode.GetId();
+                        Console.WriteLine("Decision left succ: {0}, {1}, {2}", nextLeftNode.GetId(), yPositioner + 2, xPositioner);
                         visited.Add(nextLeftNode.GetId());
                         SetSubtreeSecondIteration(yPositioner + 2, xPositioner, nextLeftNode, level + 1, depth);
                     }
@@ -304,26 +374,6 @@ namespace FlowChartBuilder.Helpers
                 counter = 0;
             }
 
-            //if (highRows.Count >= 4)
-            //    highRows.RemoveRange(highRows.Count - 4, 3);
-            //else
-            //    highRows = new List<int>();
-            //if (lowRows.Count >= 4)
-            //    lowRows.RemoveRange(0, 3);
-            //else
-            //    lowRows = new List<int>();
-            //if (rightCols.Count >= 4)
-            //    rightCols.RemoveRange(rightCols.Count - 4, 3);
-            //else
-            //    rightCols = new List<int>();
-            //if (leftCols.Count >= 4)
-            //    leftCols.RemoveRange(0, 3);
-            //else
-            //    leftCols = new List<int>();
-
-            //rowsToRemove = highRows.Union(lowRows).ToList();
-            //colsToRemove = rightCols.Union(leftCols).ToList();
-
             var newGrid = TrimArray(rowsToRemove, colsToRemove, this.Grid);
             this.Grid = newGrid;
 
@@ -331,7 +381,7 @@ namespace FlowChartBuilder.Helpers
 
         private int[,] TrimArray(List<int> rowsToRemove, List<int> columnsToRemove, int[,] originalArray)
         {
-            int[,] result = new int[originalArray.GetLength(0) - rowsToRemove.Count, originalArray.GetLength(1) - columnsToRemove.Count];
+            int[,] result = new int[(originalArray.GetLength(0) - rowsToRemove.Count + 4) * 2, (originalArray.GetLength(1) - columnsToRemove.Count + 4) * 2];
 
             for (int i = 0, j = 0; i < originalArray.GetLength(0); i++)
             {
@@ -343,7 +393,7 @@ namespace FlowChartBuilder.Helpers
                     if (columnsToRemove.Contains(k))
                         continue;
 
-                    result[j, u] = originalArray[i, k];
+                    result[(j + 2)*2, (u + 2)*2] = originalArray[i, k];
                     u++;
                 }
                 j++;

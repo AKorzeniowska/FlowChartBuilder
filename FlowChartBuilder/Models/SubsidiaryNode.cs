@@ -4,22 +4,11 @@ using System.Text;
 
 namespace FlowChartBuilder.Models
 {
-    public class ProcessNode : INode
+    public class SubsidiaryNode : INode
     {
         private int Id { get; set; }
-        private int FollowingNodeId { get; set; }
         private Coordinates Position { get; set; }
-
-        public ProcessNode(int id)
-        {
-            this.Id = id;
-        }
-
-        public void AddFollowingNode(int nodeId)
-        {
-            this.FollowingNodeId = nodeId;
-        }
-
+        private int FollowingNodeId { get; set; }
         public int GetId()
         {
             return this.Id;
@@ -30,9 +19,10 @@ namespace FlowChartBuilder.Models
             return this.FollowingNodeId;
         }
 
-        public void SetPosition(int x, int y)
+        public SubsidiaryNode(int id, int followingNodeId)
         {
-            this.Position = new Coordinates(x, y);
+            this.Id = id;
+            this.FollowingNodeId = followingNodeId;
         }
 
         public Coordinates GetPosition()
@@ -43,12 +33,16 @@ namespace FlowChartBuilder.Models
         public void IncreaseId()
         {
             this.Id++;
-            this.FollowingNodeId++;
+        }
+
+        public void SetPosition(int x, int y)
+        {
+            this.Position = new Coordinates(x, y);
         }
 
         public bool IsNodeSelfJoining()
         {
-            return this.Id == this.FollowingNodeId;
+            return false;
         }
     }
 }
