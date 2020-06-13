@@ -73,6 +73,7 @@ namespace FlowChartBuilder.Helpers
             {
                 var processNode = new ProcessNode(int.Parse(nodeData[0]));
                 processNode.AddFollowingNode(int.Parse(nodeData[2]));
+                processNode.SetName(nodeData[1]);
                 return processNode;
             }
             else if (new Regex(@"x[0-9]+").IsMatch(nodeType))
@@ -80,6 +81,7 @@ namespace FlowChartBuilder.Helpers
                 var decisionNode = new DecisionNode(int.Parse(nodeData[0]));
                 decisionNode.AddLeftNode(int.Parse(nodeData[3]));
                 decisionNode.AddRightNode(int.Parse(nodeData[2]));
+                decisionNode.SetName(nodeData[1]);
                 return decisionNode;
             }
             else return null;

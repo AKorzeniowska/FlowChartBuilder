@@ -47,5 +47,10 @@ namespace FlowChartBuilder.Models
         {
             return this.Id == this.FollowingNodeId;
         }
+
+        public string GetName()
+        {
+            return "S";
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using FlowChartBuilder;
 using FlowChartBuilder.Helpers;
 using FlowChartBuilder.Models;
+using Petzold.Media2D;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -68,42 +69,61 @@ namespace UI
             this.Lines = graph.GetLines();
             this.Nodes = graph.GetNodes();
 
-            int id = 1;
             foreach (var line in Lines)
             {
-                var points = line.GetPointsOfLine();
-                for (int i = 0; i < points.Count - 1; i++)
-                {
-                    Vectors.Add(new VectorModel(new Coordinates(points[i].x * _multiplier, points[i].y * _multiplier), new Coordinates(points[i + 1].x * _multiplier, points[i + 1].y * _multiplier), id));
-                }
-                id++;
+                ArrowPolyline apoly = new ArrowPolyline();
+                RotateTransform xform = new RotateTransform();
+                apoly.LayoutTransform = xform;
+                if (line.IsReversed)
+                    apoly.ArrowEnds = ArrowEnds.Start;
+                else
+                    apoly.ArrowEnds = ArrowEnds.End;
+                apoly.Stroke = Brushes.Green;
+                apoly.StrokeThickness = 3;
+
+
+                foreach (var point in line.GetPointsOfLine())
+                    apoly.Points.Add(new Point((point.y * _multiplier) +_rectangleWidth / 2 + 20, (point.x * _multiplier) + _rectangleWidth / 2 + 20));
+                myCanvas.Children.Add(apoly);
             }
 
-            this.Vectors = this.Vectors.Where(x => x.Id <= 100).ToList();
-            this.Recheck = new Queue<VectorModel>();
-            foreach (var vector in Vectors)
-            {
-                AddLine(vector);
-            }
+            //int id = 1;
+            //foreach (var line in Lines)
+            //{
+            //    var points = line.GetPointsOfLine();
+            //    for (int i = 0; i < points.Count - 1; i++)
+            //    {
+            //        Vectors.Add(new VectorModel(new Coordinates(points[i].x * _multiplier, points[i].y * _multiplier), new Coordinates(points[i + 1].x * _multiplier, points[i + 1].y * _multiplier), id));
+            //    }
+            //    id++;
+            //}
 
-            while (this.Recheck.Count != 0)
-            {
-                var recheck = this.Recheck.Dequeue();
-                if (recheck.GetChangeNumber() < 5)
-                {
-                    recheck.AddChange();
-                    AddLine(recheck);
-                }
-            }
+            //this.Vectors = this.Vectors.Where(x => x.Id <= 100).ToList();
+            //this.Recheck = new Queue<VectorModel>();
+            //foreach (var vector in Vectors)
+            //{
+            //    AddLine(vector);
+            //}
 
-            foreach (var vector in Vectors)
-            {
-                DrawVector(vector);
-            }
+            //while (this.Recheck.Count != 0)
+            //{
+            //    var recheck = this.Recheck.Dequeue();
+            //    if (recheck.GetChangeNumber() < 5)
+            //    {
+            //        recheck.AddChange();
+            //        AddLine(recheck);
+            //    }
+            //}
+
+            //foreach (var vector in Vectors)
+            //{
+            //    DrawVector(vector);
+            //}
 
             foreach (var node in Nodes)
             {
-                AddBlock(node.GetPosition().y, node.GetPosition().x, node.GetId(), node.GetType());
+                //AddBlock(node.GetPosition().y, node.GetPosition().x, node.GetId(), node.GetType());
+                AddBlockWithName(node.GetPosition().y, node.GetPosition().x, node.GetName(), node.GetType());
             }
         }
 
@@ -207,6 +227,39 @@ namespace UI
             textBlock.Height = _rectangleHeight - _lineThickness;
             textBlock.Width = _rectangleWidth - _lineThickness;
             textBlock.Inlines.Add(new Run(id.ToString()));
+            textBlock.TextAlignment = TextAlignment.Center;
+
+            myCanvas.Children.Add(rect);
+            Canvas.SetTop(rect, y * _multiplier + 20);
+            Canvas.SetLeft(rect, x * _multiplier + 20);
+
+            myCanvas.Children.Add(textBlock);
+            Canvas.SetTop(textBlock, y * _multiplier + 20 + _lineThickness);
+            Canvas.SetLeft(textBlock, x * _multiplier + 20 + _lineThickness);
+        }
+
+        private void AddBlockWithName(int x, int y, string name, Type type)
+        {
+            Rectangle rect = new Rectangle();
+
+            if (type == typeof(StartingNode))
+                rect.Stroke = new SolidColorBrush(Colors.Green);
+            else if (type == typeof(ProcessNode))
+                rect.Stroke = new SolidColorBrush(Colors.Blue);
+            else if (type == typeof(DecisionNode))
+                rect.Stroke = new SolidColorBrush(Colors.Yellow);
+            else if (type == typeof(EndingNode))
+                rect.Stroke = new SolidColorBrush(Colors.Red);
+
+            rect.Fill = new SolidColorBrush(Colors.White);
+            rect.Width = _rectangleWidth;
+            rect.Height = _rectangleHeight;
+            rect.StrokeThickness = _lineThickness;
+
+            TextBlock textBlock = new TextBlock();
+            textBlock.Height = _rectangleHeight - _lineThickness;
+            textBlock.Width = _rectangleWidth - _lineThickness;
+            textBlock.Inlines.Add(new Run(name));
             textBlock.TextAlignment = TextAlignment.Center;
 
             myCanvas.Children.Add(rect);

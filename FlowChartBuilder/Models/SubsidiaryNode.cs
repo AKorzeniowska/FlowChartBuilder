@@ -44,5 +44,10 @@ namespace FlowChartBuilder.Models
         {
             return false;
         }
+
+        public string GetName()
+        {
+            return "";
+        }
     }
 }

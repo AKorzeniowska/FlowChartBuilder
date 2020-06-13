@@ -12,5 +12,6 @@ namespace FlowChartBuilder
         void SetPosition(int x, int y);
         Coordinates GetPosition();
         bool IsNodeSelfJoining();
+        string GetName();
     }
 }

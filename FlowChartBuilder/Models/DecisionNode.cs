@@ -12,11 +12,21 @@ namespace FlowChartBuilder.Models
         private int RightFollowingNodeId { get; set; }
         private string RightFollowingNodeCondition { get; set; }
         private Coordinates Position { get; set; }
+        private String Name { get; set; }
 
         public DecisionNode(int id)
         {
             this.Id = id;
         }
+        public String GetName()
+        {
+            return this.Name;
+        }
+        public void SetName(String name)
+        {
+            this.Name = name;
+        }
+
 
         public void AddLeftNode(int nodeId, string condition)
         {

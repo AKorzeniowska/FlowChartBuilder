@@ -6,6 +6,7 @@ namespace FlowChartBuilder.Models
 {
     public class ProcessNode : INode
     {
+        private String Name { get; set; }
         private int Id { get; set; }
         private int FollowingNodeId { get; set; }
         private Coordinates Position { get; set; }
@@ -13,6 +14,15 @@ namespace FlowChartBuilder.Models
         public ProcessNode(int id)
         {
             this.Id = id;
+        }
+
+        public String GetName()
+        {
+            return this.Name;
+        }
+        public void SetName(String name)
+        {
+            this.Name = name;
         }
 
         public void AddFollowingNode(int nodeId)
