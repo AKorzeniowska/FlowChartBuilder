@@ -1,6 +1,0 @@
-1 Begin 2
-2 Proc 3
-3 Proc 4
-4 Decis 2 5 tak nie
-5 Proc 6
-6 End
